@@ -308,3 +308,378 @@ style.textContent = `
     img.loaded { animation: scale-in 0.5s ease; }
 `;
 document.head.appendChild(style);
+
+// ==========================================
+// Auto Translation System (LibreTranslate)
+// ==========================================
+class AutoTranslator {
+    constructor() {
+        this.cache = JSON.parse(localStorage.getItem('translationCache') || '{}');
+        this.currentLang = localStorage.getItem('selectedLang') || this.detectLanguage();
+        this.isTranslating = false;
+        this.translatedElements = new Set();
+        // LibreTranslate endpoint - use relative URL for same-origin
+        this.translateEndpoint = '/api/translate';
+    }
+
+    // Detect if user is from China or prefers Chinese
+    detectLanguage() {
+        const userLang = navigator.language || navigator.userLanguage;
+        const isChineseUser = userLang.startsWith('zh') || 
+                              userLang.includes('CN') || 
+                              userLang.includes('TW') ||
+                              userLang.includes('HK');
+        
+        // Also check timezone for China
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const isChineseTimezone = timezone.includes('Shanghai') || 
+                                   timezone.includes('Hong_Kong') ||
+                                   timezone.includes('Taipei');
+        
+        return (isChineseUser || isChineseTimezone) ? 'zh' : 'en';
+    }
+
+    // Translate text using LibreTranslate API
+    async translateText(text, targetLang = 'zh') {
+        if (!text || text.trim().length === 0) return text;
+        if (targetLang === 'en') return text;
+        
+        // Check cache first
+        const cacheKey = `${text.trim()}_${targetLang}`;
+        if (this.cache[cacheKey]) {
+            return this.cache[cacheKey];
+        }
+
+        try {
+            const response = await fetch(this.translateEndpoint, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    q: text.trim(),
+                    source: 'en',
+                    target: targetLang,
+                    format: 'text'
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.translatedText) {
+                    // Cache the result
+                    this.cache[cacheKey] = data.translatedText;
+                    this.saveCache();
+                    return data.translatedText;
+                }
+            }
+        } catch (error) {
+            console.warn('Translation failed:', error.message);
+        }
+        
+        return text; // Return original if failed
+    }
+
+    saveCache() {
+        try {
+            // Limit cache size to prevent localStorage overflow
+            const keys = Object.keys(this.cache);
+            if (keys.length > 500) {
+                // Remove oldest 100 entries
+                keys.slice(0, 100).forEach(key => delete this.cache[key]);
+            }
+            localStorage.setItem('translationCache', JSON.stringify(this.cache));
+        } catch (e) {
+            console.warn('Cache save failed:', e);
+        }
+    }
+
+    // Get all text nodes that should be translated
+    getTextNodes(element) {
+        const textNodes = [];
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: (node) => {
+                    // Skip empty nodes, scripts, styles, and already translated
+                    if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+                    if (node.parentElement.tagName === 'SCRIPT') return NodeFilter.FILTER_REJECT;
+                    if (node.parentElement.tagName === 'STYLE') return NodeFilter.FILTER_REJECT;
+                    if (node.parentElement.tagName === 'CODE') return NodeFilter.FILTER_REJECT;
+                    if (node.parentElement.tagName === 'PRE') return NodeFilter.FILTER_REJECT;
+                    if (node.parentElement.closest('[data-no-translate]')) return NodeFilter.FILTER_REJECT;
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }
+        );
+        
+        let node;
+        while (node = walker.nextNode()) {
+            textNodes.push(node);
+        }
+        return textNodes;
+    }
+
+    // Translate the entire page
+    async translatePage() {
+        if (this.isTranslating || this.currentLang === 'en') return;
+        this.isTranslating = true;
+        
+        this.showLoadingIndicator();
+        
+        try {
+            const textNodes = this.getTextNodes(document.body);
+            const batchSize = 5; // Translate in batches to avoid rate limiting
+            
+            for (let i = 0; i < textNodes.length; i += batchSize) {
+                const batch = textNodes.slice(i, i + batchSize);
+                await Promise.all(batch.map(async (node) => {
+                    const nodeId = this.getNodeId(node);
+                    if (this.translatedElements.has(nodeId)) return;
+                    
+                    const originalText = node.textContent.trim();
+                    if (originalText.length < 2) return; // Skip very short text
+                    
+                    // Store original text
+                    if (!node.parentElement.dataset.originalText) {
+                        node.parentElement.dataset.originalText = originalText;
+                    }
+                    
+                    const translatedText = await this.translateText(originalText, this.currentLang);
+                    if (translatedText !== originalText) {
+                        node.textContent = node.textContent.replace(originalText, translatedText);
+                        this.translatedElements.add(nodeId);
+                    }
+                }));
+                
+                // Small delay between batches
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // Also translate placeholders and titles
+            await this.translateAttributes();
+            
+        } catch (error) {
+            console.error('Translation failed:', error);
+        } finally {
+            this.isTranslating = false;
+            this.hideLoadingIndicator();
+        }
+    }
+
+    // Translate element attributes (placeholders, titles, alt text)
+    async translateAttributes() {
+        const elements = document.querySelectorAll('[placeholder], [title], [alt]');
+        
+        for (const el of elements) {
+            if (el.placeholder && !el.dataset.originalPlaceholder) {
+                el.dataset.originalPlaceholder = el.placeholder;
+                el.placeholder = await this.translateText(el.placeholder, this.currentLang);
+            }
+            if (el.title && !el.dataset.originalTitle) {
+                el.dataset.originalTitle = el.title;
+                el.title = await this.translateText(el.title, this.currentLang);
+            }
+            if (el.alt && !el.dataset.originalAlt) {
+                el.dataset.originalAlt = el.alt;
+                el.alt = await this.translateText(el.alt, this.currentLang);
+            }
+        }
+    }
+
+    getNodeId(node) {
+        return `${node.parentElement.tagName}_${node.textContent.substring(0, 20)}`;
+    }
+
+    // Restore original text
+    restoreOriginal() {
+        document.querySelectorAll('[data-original-text]').forEach(el => {
+            const textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+            if (textNode) {
+                textNode.textContent = el.dataset.originalText;
+            }
+            delete el.dataset.originalText;
+        });
+        
+        document.querySelectorAll('[data-original-placeholder]').forEach(el => {
+            el.placeholder = el.dataset.originalPlaceholder;
+            delete el.dataset.originalPlaceholder;
+        });
+        
+        document.querySelectorAll('[data-original-title]').forEach(el => {
+            el.title = el.dataset.originalTitle;
+            delete el.dataset.originalTitle;
+        });
+        
+        document.querySelectorAll('[data-original-alt]').forEach(el => {
+            el.alt = el.dataset.originalAlt;
+            delete el.dataset.originalAlt;
+        });
+        
+        this.translatedElements.clear();
+    }
+
+    // Set language and translate/restore
+    async setLanguage(lang) {
+        this.currentLang = lang;
+        localStorage.setItem('selectedLang', lang);
+        
+        if (lang === 'en') {
+            this.restoreOriginal();
+        } else {
+            await this.translatePage();
+        }
+        
+        this.updateLanguageSwitcher();
+    }
+
+    // Show loading indicator
+    showLoadingIndicator() {
+        if (document.getElementById('translate-loading')) return;
+        
+        const loader = document.createElement('div');
+        loader.id = 'translate-loading';
+        loader.innerHTML = `
+            <div style="position: fixed; top: 20px; right: 20px; z-index: 10000; 
+                        background: rgba(249, 115, 22, 0.9); color: white; 
+                        padding: 12px 20px; border-radius: 8px; 
+                        display: flex; align-items: center; gap: 10px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <svg class="animate-spin" style="width: 20px; height: 20px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>翻译中... Translating...</span>
+            </div>
+        `;
+        document.body.appendChild(loader);
+    }
+
+    hideLoadingIndicator() {
+        const loader = document.getElementById('translate-loading');
+        if (loader) loader.remove();
+    }
+
+    updateLanguageSwitcher() {
+        const buttons = document.querySelectorAll('.lang-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.lang === this.currentLang) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // Create language switcher UI
+    createLanguageSwitcher() {
+        const switcher = document.createElement('div');
+        switcher.id = 'language-switcher';
+        switcher.innerHTML = `
+            <style>
+                #language-switcher {
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    gap: 4px;
+                    background: rgba(30, 30, 46, 0.9);
+                    backdrop-filter: blur(10px);
+                    padding: 4px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                }
+                .lang-btn {
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    background: transparent;
+                    color: #9ca3af;
+                }
+                .lang-btn:hover {
+                    color: white;
+                    background: rgba(249, 115, 22, 0.2);
+                }
+                .lang-btn.active {
+                    background: linear-gradient(135deg, #f97316, #ea580c);
+                    color: white;
+                    box-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .animate-spin {
+                    animation: spin 1s linear infinite;
+                }
+            </style>
+            <button class="lang-btn ${this.currentLang === 'en' ? 'active' : ''}" data-lang="en">EN</button>
+            <button class="lang-btn ${this.currentLang === 'zh' ? 'active' : ''}" data-lang="zh">中文</button>
+        `;
+        
+        document.body.appendChild(switcher);
+        
+        // Add click handlers
+        switcher.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.setLanguage(btn.dataset.lang);
+            });
+        });
+    }
+
+    // Initialize
+    async init() {
+        this.createLanguageSwitcher();
+        
+        // Auto-translate if Chinese user
+        if (this.currentLang === 'zh') {
+            // Wait for page to fully load
+            if (document.readyState === 'complete') {
+                await this.translatePage();
+            } else {
+                window.addEventListener('load', () => this.translatePage());
+            }
+        }
+        
+        // Watch for dynamic content changes
+        this.observeDynamicContent();
+    }
+
+    // Watch for dynamic content and translate it
+    observeDynamicContent() {
+        const observer = new MutationObserver((mutations) => {
+            if (this.currentLang !== 'zh' || this.isTranslating) return;
+            
+            let hasNewContent = false;
+            mutations.forEach(mutation => {
+                if (mutation.addedNodes.length > 0) {
+                    hasNewContent = true;
+                }
+            });
+            
+            if (hasNewContent) {
+                // Debounce translation for dynamic content
+                clearTimeout(this.dynamicTranslateTimeout);
+                this.dynamicTranslateTimeout = setTimeout(() => {
+                    this.translatePage();
+                }, 500);
+            }
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+}
+
+// Initialize translator
+const autoTranslator = new AutoTranslator();
+autoTranslator.init();
