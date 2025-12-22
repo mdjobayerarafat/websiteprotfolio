@@ -1,6 +1,6 @@
 use rusqlite::{Connection, Result};
 use bcrypt::{hash, DEFAULT_COST};
-use crate::models::{EmailSettings, EmailSettingsForm, SiteContentItem};
+use crate::models::{EducationForm, EmailSettings, EmailSettingsForm, SiteContentItem};
 
 pub fn init_db() -> Result<Connection> {
     let db_path = std::env::var("DATABASE_URL").unwrap_or_else(|_| "portfolio.db".to_string());
@@ -722,7 +722,7 @@ pub fn get_education_by_id(conn: &Connection, id: i32) -> Result<Education> {
     )
 }
 
-pub fn add_education(conn: &Connection, edu: &Education) -> Result<()> {
+pub fn add_education(conn: &Connection, edu: &EducationForm) -> Result<()> {
     conn.execute(
         "INSERT INTO education (institution, degree, field, start_date, end_date, description) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         rusqlite::params![edu.institution, edu.degree, edu.field, edu.start_date, edu.end_date, edu.description],
@@ -730,10 +730,10 @@ pub fn add_education(conn: &Connection, edu: &Education) -> Result<()> {
     Ok(())
 }
 
-pub fn update_education(conn: &Connection, edu: &Education) -> Result<()> {
+pub fn update_education(conn: &Connection, id: i32, edu: &EducationForm) -> Result<()> {
     conn.execute(
         "UPDATE education SET institution = ?1, degree = ?2, field = ?3, start_date = ?4, end_date = ?5, description = ?6 WHERE id = ?7",
-        rusqlite::params![edu.institution, edu.degree, edu.field, edu.start_date, edu.end_date, edu.description, edu.id],
+        rusqlite::params![edu.institution, edu.degree, edu.field, edu.start_date, edu.end_date, edu.description, id],
     )?;
     Ok(())
 }

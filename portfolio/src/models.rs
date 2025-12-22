@@ -175,6 +175,16 @@ pub struct ServiceForm {
     pub order_index: i32,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct EducationForm {
+    pub institution: String,
+    pub degree: String,
+    pub field: String,
+    pub start_date: String,
+    pub end_date: String,
+    pub description: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EmailSettings {
     pub id: i32,

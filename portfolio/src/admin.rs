@@ -1207,7 +1207,7 @@ pub async fn add_education_page(
 
 pub async fn add_education(
     data: web::Data<AppState>,
-    form: web::Form<Education>,
+    form: web::Form<EducationForm>,
     session: Session,
 ) -> HttpResponse {
     if let Some(redirect) = require_auth(&session) {
@@ -1254,7 +1254,7 @@ pub async fn edit_education_page(
 pub async fn update_education(
     data: web::Data<AppState>,
     path: web::Path<i32>,
-    form: web::Form<Education>,
+    form: web::Form<EducationForm>,
     session: Session,
 ) -> HttpResponse {
     if let Some(redirect) = require_auth(&session) {
@@ -1264,10 +1264,7 @@ pub async fn update_education(
     let conn = data.db.lock().unwrap();
     let id = path.into_inner();
     
-    let mut edu = form.into_inner();
-    edu.id = id;
-    
-    match db::update_education(&conn, &edu) {
+    match db::update_education(&conn, id, &form.into_inner()) {
         Ok(_) => log::info!("Education updated successfully"),
         Err(e) => log::error!("Failed to update education: {}", e),
     }
