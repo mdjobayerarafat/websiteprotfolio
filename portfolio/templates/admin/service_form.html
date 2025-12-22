@@ -1,0 +1,162 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Page Header -->
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <a href="/admin/services" class="inline-flex items-center gap-2 text-gray-400 hover:text-accent-400 transition-colors mb-4 font-mono text-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            cd ../services
+        </a>
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyber-green to-cyber-blue flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {% if service %}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    {% else %}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    {% endif %}
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold gradient-text">{% if service %}Edit Service{% else %}Add Service{% endif %}</h1>
+                <p class="text-gray-400 text-sm font-mono">$ service --{% if service %}edit --id={{ service.id }}{% else %}create --new{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="cyber-card rounded-xl overflow-hidden">
+        <!-- Terminal Header -->
+        <div class="flex items-center gap-2 px-6 py-4 border-b border-white/10 bg-dark-800/50">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="ml-4 text-xs text-gray-500 font-mono">service_editor.exe --mode=form</span>
+        </div>
+        
+        <div class="p-6">
+            <form action="{% if service %}/admin/services/edit/{{ service.id }}{% else %}/admin/services/add{% endif %}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                
+                <!-- Basic Info Section -->
+                <div class="border-b border-white/10 pb-6">
+                    <h3 class="text-sm font-mono text-cyber-blue uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyber-blue animate-pulse"></span>
+                        Service Details
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                                <span class="text-accent-500">$</span> Service Name *
+                            </label>
+                            <input type="text" id="name" name="name" required
+                                   value="{% if service %}{{ service.name }}{% endif %}"
+                                   placeholder="e.g., UI/UX Design"
+                                   class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none">
+                        </div>
+                        
+                        <div>
+                            <label for="description" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                                <span class="text-accent-500">$</span> Description
+                            </label>
+                            <textarea id="description" name="description" rows="4"
+                                      placeholder="Describe what this service includes..."
+                                      class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none resize-none">{% if service %}{{ service.description }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="icon" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                                <span class="text-accent-500">$</span> Icon (Emoji)
+                            </label>
+                            <input type="text" id="icon" name="icon"
+                                   value="{% if service %}{{ service.icon }}{% else %}🎨{% endif %}"
+                                   placeholder="🎨"
+                                   class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none text-2xl">
+                            <p class="text-xs text-gray-500 mt-1 font-mono">Use an emoji: 🎨 🌐 📄 💻 🔧 📊</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Media Section -->
+                <div class="border-b border-white/10 pb-6">
+                    <h3 class="text-sm font-mono text-cyber-purple uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyber-purple animate-pulse"></span>
+                        Service Image
+                    </h3>
+                    
+                    {% if service and service.image_url %}
+                    <div class="mb-4">
+                        <img src="{{ service.image_url }}" alt="{{ service.name }}" class="w-full h-40 object-cover rounded-lg border border-white/10">
+                        <input type="hidden" name="image_url" value="{{ service.image_url }}">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="glass-cyber rounded-xl p-4">
+                        <label for="image" class="flex flex-col items-center justify-center w-full h-32 border-2 border-white/10 border-dashed rounded-lg cursor-pointer hover:border-accent-500/50 transition-colors">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-400 font-mono"><span class="text-accent-400">Click to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500 font-mono">PNG, JPG, GIF up to 5MB</p>
+                            </div>
+                            <input id="image" name="image" type="file" class="hidden" accept="image/*" onchange="previewImage(this)">
+                        </label>
+                    </div>
+                    <div id="imagePreview" class="mt-4 hidden">
+                        <img id="previewImg" class="w-full h-40 object-cover rounded-lg border border-white/10">
+                    </div>
+                </div>
+                
+                <!-- Order Section -->
+                <div class="border-b border-white/10 pb-6">
+                    <h3 class="text-sm font-mono text-cyber-green uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+                        Display Settings
+                    </h3>
+                    
+                    <div>
+                        <label for="order_index" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Display Order
+                        </label>
+                        <input type="number" id="order_index" name="order_index" min="0"
+                               value="{% if service %}{{ service.order_index }}{% else %}0{% endif %}"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                        <p class="text-xs text-gray-500 mt-1 font-mono">Lower numbers appear first (0, 1, 2...)</p>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 cyber-btn py-3 rounded-lg text-white font-bold text-sm uppercase tracking-wider">
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            {% if service %}Update Service{% else %}Add Service{% endif %}
+                        </span>
+                    </button>
+                    <a href="/admin/services" class="px-6 py-3 rounded-lg border border-white/10 text-gray-300 font-mono text-sm hover:bg-white/5 transition-colors flex items-center justify-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').classList.remove('hidden');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

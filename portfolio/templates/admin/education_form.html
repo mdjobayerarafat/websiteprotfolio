@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Page Header -->
+<div class="flex items-center gap-4 mb-8">
+    <a href="/admin/education" class="w-10 h-10 rounded-lg bg-dark-700/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-accent-500/50 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+    </a>
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyber-purple to-cyber-blue flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">{% if education %}Edit Education{% else %}Add Education{% endif %}</h1>
+            <p class="text-gray-400 text-sm font-mono">$ education.{% if education %}update{% else %}create{% endif %}()</p>
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<div class="cyber-card rounded-xl p-6">
+    <form action="{% if education %}/admin/education/edit/{{ education.id }}{% else %}/admin/education/add{% endif %}" method="POST" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Degree -->
+            <div class="md:col-span-2">
+                <label for="degree" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Degree / Certificate
+                </label>
+                <input type="text" id="degree" name="degree" required
+                       value="{{ education.degree | default(value='') }}"
+                       placeholder="e.g., Bachelor of Science, Master's Degree, PhD"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- Institution -->
+            <div class="md:col-span-2">
+                <label for="institution" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Institution
+                </label>
+                <input type="text" id="institution" name="institution" required
+                       value="{{ education.institution | default(value='') }}"
+                       placeholder="e.g., University of Technology"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- Field of Study -->
+            <div class="md:col-span-2">
+                <label for="field" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Field of Study
+                </label>
+                <input type="text" id="field" name="field" required
+                       value="{{ education.field | default(value='') }}"
+                       placeholder="e.g., Computer Science and Engineering"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- Start Date -->
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Start Date
+                </label>
+                <input type="text" id="start_date" name="start_date" required
+                       value="{{ education.start_date | default(value='') }}"
+                       placeholder="e.g., 2016"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- End Date -->
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> End Date
+                </label>
+                <input type="text" id="end_date" name="end_date"
+                       value="{{ education.end_date | default(value='') }}"
+                       placeholder="e.g., 2020 (leave empty if ongoing)"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Description (Optional)
+                </label>
+                <textarea id="description" name="description" rows="4"
+                          placeholder="Additional details about your education, achievements, focus areas..."
+                          class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all resize-none">{{ education.description | default(value='') }}</textarea>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex justify-end gap-4 pt-6 border-t border-white/5">
+            <a href="/admin/education" class="px-6 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-gray-400 hover:text-white hover:border-white/30 font-medium transition-all">
+                Cancel
+            </a>
+            <button type="submit" class="cyber-btn px-6 py-3 rounded-lg text-white font-bold uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {% if education %}Update Education{% else %}Add Education{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

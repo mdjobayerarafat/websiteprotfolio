@@ -1,0 +1,249 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">Edit Profile</h1>
+            <p class="text-gray-400 text-sm font-mono">$ system.user.profile --edit</p>
+        </div>
+    </div>
+</div>
+
+{% if success %}
+<div class="glass-cyber rounded-xl p-4 mb-6 border-l-4 border-cyber-green">
+    <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-cyber-green/20 flex items-center justify-center">
+            <svg class="w-5 h-5 text-cyber-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <div>
+            <p class="text-cyber-green font-medium">Profile Updated Successfully</p>
+            <p class="text-gray-400 text-sm font-mono">Status: SYNC_COMPLETE</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="cyber-card rounded-xl overflow-hidden">
+    <!-- Terminal Header -->
+    <div class="flex items-center gap-2 px-6 py-4 border-b border-white/10 bg-dark-800/50">
+        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        <span class="ml-4 text-xs text-gray-500 font-mono">profile_editor.exe --mode=visual</span>
+    </div>
+    
+    <div class="p-6">
+        <form action="/admin/profile" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- Basic Info Section -->
+            <div class="border-b border-white/10 pb-6">
+                <h3 class="text-sm font-mono text-cyber-blue uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyber-blue animate-pulse"></span>
+                    Basic Information
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Full Name
+                        </label>
+                        <input type="text" id="name" name="name" value="{{ profile.name }}" required
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                    
+                    <div>
+                        <label for="title" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Job Title
+                        </label>
+                        <input type="text" id="title" name="title" value="{{ profile.title }}" required
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bio Section -->
+            <div class="border-b border-white/10 pb-6">
+                <div>
+                    <label for="bio" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                        <span class="text-accent-500">$</span> Bio Description
+                    </label>
+                    <textarea id="bio" name="bio" rows="4" required
+                              class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none resize-none">{{ profile.bio }}</textarea>
+                </div>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="border-b border-white/10 pb-6">
+                <h3 class="text-sm font-mono text-cyber-blue uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyber-blue animate-pulse"></span>
+                    Contact Information
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="email" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Email Address
+                        </label>
+                        <input type="email" id="email" name="email" value="{{ profile.email }}" required
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Phone Number
+                        </label>
+                        <input type="text" id="phone" name="phone" value="{{ profile.phone }}"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="location" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Location
+                        </label>
+                        <input type="text" id="location" name="location" value="{{ profile.location }}"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Social Links Section -->
+            <div class="border-b border-white/10 pb-6">
+                <h3 class="text-sm font-mono text-cyber-purple uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyber-purple animate-pulse"></span>
+                    Network Connections
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="github_url" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> GitHub URL
+                        </label>
+                        <input type="url" id="github_url" name="github_url" value="{{ profile.github_url }}"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono text-sm">
+                    </div>
+                    
+                    <div>
+                        <label for="linkedin_url" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> LinkedIn URL
+                        </label>
+                        <input type="url" id="linkedin_url" name="linkedin_url" value="{{ profile.linkedin_url }}"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono text-sm">
+                    </div>
+                    
+                    <div>
+                        <label for="twitter_url" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Twitter/X URL
+                        </label>
+                        <input type="url" id="twitter_url" name="twitter_url" value="{{ profile.twitter_url }}"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono text-sm">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Files Section -->
+            <div class="border-b border-white/10 pb-6">
+                <h3 class="text-sm font-mono text-cyber-green uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+                    File Uploads
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Resume Upload -->
+                    <div class="glass-cyber rounded-xl p-4">
+                        <label class="block text-xs font-mono text-gray-400 mb-3 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Resume/CV File
+                        </label>
+                        {% if profile.resume_url %}
+                        <div class="flex items-center gap-3 mb-3 p-3 bg-cyber-green/10 rounded-lg border border-cyber-green/30">
+                            <svg class="w-8 h-8 text-cyber-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm text-white font-mono">Resume uploaded</p>
+                                <a href="{{ profile.resume_url }}" target="_blank" class="text-xs text-cyber-green hover:underline">Download →</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <input type="file" id="resume_file" name="resume_file" accept=".pdf,.doc,.docx"
+                               class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-500/20 file:text-accent-400 file:cursor-pointer hover:file:bg-accent-500/30">
+                        <p class="text-xs text-gray-500 mt-2 font-mono">PDF, DOC, DOCX (Max 10MB)</p>
+                        <input type="hidden" name="resume_url" value="{{ profile.resume_url }}">
+                    </div>
+                    
+                    <!-- Avatar Upload -->
+                    <div class="glass-cyber rounded-xl p-4">
+                        <label class="block text-xs font-mono text-gray-400 mb-3 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Avatar Image
+                        </label>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0">
+                                {% if profile.avatar_url %}
+                                <img src="{{ profile.avatar_url }}" alt="Avatar" 
+                                     class="w-16 h-16 rounded-full object-cover border-2 border-accent-500/50" id="avatar-preview">
+                                {% else %}
+                                <div class="w-16 h-16 rounded-full bg-dark-700 border-2 border-white/10 flex items-center justify-center" id="avatar-preview-placeholder">
+                                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <img src="" alt="Avatar Preview" class="w-16 h-16 rounded-full object-cover border-2 border-accent-500/50 hidden" id="avatar-preview">
+                                {% endif %}
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" id="avatar_file" name="avatar_file" accept="image/*"
+                                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-500/20 file:text-accent-400 file:cursor-pointer hover:file:bg-accent-500/30"
+                                       onchange="previewAvatar(this)">
+                                <p class="text-xs text-gray-500 mt-2 font-mono">JPG, PNG, WebP (Max 5MB)</p>
+                                <div class="mt-2">
+                                    <input type="text" id="avatar_url" name="avatar_url" value="{{ profile.avatar_url }}" placeholder="Or enter URL..."
+                                           class="w-full px-3 py-2 text-sm rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="cyber-btn px-8 py-3 rounded-lg text-white font-bold text-sm uppercase tracking-wider">
+                    <span class="relative z-10 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Save Changes
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let preview = document.getElementById('avatar-preview');
+            let placeholder = document.getElementById('avatar-preview-placeholder');
+            if (placeholder) {
+                placeholder.classList.add('hidden');
+            }
+            if (preview) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

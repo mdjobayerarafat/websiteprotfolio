@@ -1,0 +1,51 @@
+# Build artifacts
+target/
+*.rs.bk
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# Documentation (optional - keep if you want docs in container)
+# README.md
+# CHANGELOG.md
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Database (will be created in container)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Test files
+tests/
+*_test.rs

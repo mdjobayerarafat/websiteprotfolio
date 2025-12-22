@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="pt-24 pb-20 relative overflow-hidden">
+    <!-- Background decorations -->
+    <div class="blob blob-pink w-[500px] h-[500px] -top-64 -left-64 opacity-25"></div>
+    <div class="blob blob-orange w-80 h-80 bottom-40 -right-40 opacity-20"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-16 animate-slide-up">
+            <span class="text-accent-500 font-medium uppercase tracking-wider text-sm">Articles</span>
+            <h1 class="text-4xl md:text-5xl font-bold mt-2 mb-4">My <span class="gradient-text">Blog</span></h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Thoughts, tutorials, and insights on software development and technology</p>
+        </div>
+        
+        <!-- Blog Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for blog in blogs %}
+            <article class="glass-card rounded-2xl overflow-hidden group animate-slide-up stagger-{{ loop.index % 6 + 1 }}">
+                <div class="aspect-video bg-dark-700 relative overflow-hidden">
+                    <img src="{{ blog.image_url }}" alt="{{ blog.title }}" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                         onerror="this.src='https://via.placeholder.com/800x450/1a1a24/f97316?text=Blog'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/30 to-transparent opacity-60"></div>
+                    
+                    <!-- Date badge -->
+                    <div class="absolute top-4 left-4 glass rounded-lg px-3 py-1">
+                        <span class="text-xs text-gray-300">{{ blog.created_at | truncate(length=10, end="") }}</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        {% for tag in blog.tags | split(pat=", ") %}
+                        <span class="px-3 py-1 bg-accent-500/10 border border-accent-500/20 text-accent-400 rounded-full text-xs font-medium">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Title -->
+                    <h2 class="text-xl font-bold mb-3 group-hover:text-accent-400 transition-colors line-clamp-2">
+                        <a href="/blogs/{{ blog.slug }}">{{ blog.title }}</a>
+                    </h2>
+                    
+                    <!-- Excerpt -->
+                    <p class="text-gray-400 mb-4 line-clamp-3">{{ blog.excerpt }}</p>
+                    
+                    <!-- Meta -->
+                    <div class="flex justify-between items-center pt-4 border-t border-dark-600/50">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full gradient-bg flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm text-gray-500">5 min read</span>
+                        </div>
+                        <a href="/blogs/{{ blog.slug }}" class="text-accent-400 hover:text-accent-300 transition-colors flex items-center text-sm font-medium gap-1">
+                            Read More
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        
+        {% if blogs | length == 0 %}
+        <div class="text-center py-20">
+            <div class="glass-card rounded-2xl p-12 max-w-md mx-auto">
+                <div class="text-6xl mb-4">📝</div>
+                <h3 class="text-xl font-bold mb-2 text-white">No blog posts yet</h3>
+                <p class="text-gray-400">Check back soon for articles and tutorials!</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

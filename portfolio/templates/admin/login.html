@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Terminal | AI Control Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            950: '#050508',
+                            900: '#0a0a0f',
+                            800: '#111118',
+                            700: '#1a1a24',
+                            600: '#252532',
+                            500: '#32323f',
+                        },
+                        accent: {
+                            500: '#f97316',
+                            600: '#ea580c',
+                            400: '#fb923c',
+                        },
+                        cyber: {
+                            blue: '#00d4ff',
+                            green: '#22c55e',
+                            purple: '#a855f7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #050508;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-cyber {
+            background: linear-gradient(135deg, rgba(17, 17, 24, 0.9), rgba(26, 26, 36, 0.8));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 60px rgba(249, 115, 22, 0.1), 0 0 100px rgba(0, 212, 255, 0.05);
+        }
+        
+        .circuit-bg {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(249, 115, 22, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                linear-gradient(rgba(249, 115, 22, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249, 115, 22, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+        }
+        
+        .data-stream {
+            position: absolute;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(0, 212, 255, 0.5), transparent);
+            animation: dataFlow 3s linear infinite;
+        }
+        
+        @keyframes dataFlow {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .cyber-input {
+            transition: all 0.3s ease;
+        }
+        .cyber-input:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1), 0 0 30px rgba(249, 115, 22, 0.15);
+        }
+        
+        .cyber-btn {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            position: relative;
+            overflow: hidden;
+        }
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            animation: scan 4s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        .terminal-text {
+            animation: typing 2s steps(30, end);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .cursor-blink::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+            color: #f97316;
+        }
+    </style>
+</head>
+<body class="bg-dark-950 text-gray-100 min-h-screen flex items-center justify-center circuit-bg relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-20 left-20 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-20 right-20 w-80 h-80 bg-cyber-blue/10 rounded-full blur-3xl animate-pulse" style="animation-delay: -1.5s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-cyber-purple/5 rounded-full blur-3xl"></div>
+        
+        <!-- Data streams -->
+        <div class="data-stream" style="left: 10%;"></div>
+        <div class="data-stream" style="left: 30%; animation-delay: -1s;"></div>
+        <div class="data-stream" style="left: 70%; animation-delay: -2s;"></div>
+        <div class="data-stream" style="left: 90%; animation-delay: -0.5s;"></div>
+    </div>
+
+    <div class="w-full max-w-md px-4 relative z-10">
+        <!-- Logo & Title -->
+        <div class="text-center mb-8">
+            <div class="relative inline-block mb-6">
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center mx-auto" style="box-shadow: 0 0 40px rgba(249, 115, 22, 0.4);">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="absolute -top-2 -right-2 w-4 h-4 bg-cyber-green rounded-full border-2 border-dark-950" style="animation: pulse-ring 2s ease-in-out infinite;"></div>
+            </div>
+            
+            <h1 class="text-3xl font-bold gradient-text mb-2">AI Control Center</h1>
+            <div class="flex items-center justify-center gap-2 text-gray-400">
+                <span class="text-xs font-mono">ACCESS TERMINAL</span>
+                <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+                <span class="text-xs font-mono">SECURE</span>
+            </div>
+        </div>
+        
+        <!-- Login Card -->
+        <div class="glass-cyber rounded-2xl p-8 relative overflow-hidden">
+            <div class="scan-line"></div>
+            
+            <!-- Terminal Header -->
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-white/10">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="ml-4 text-xs text-gray-500 font-mono">auth_terminal.exe</span>
+            </div>
+            
+            <!-- Terminal Output -->
+            <div class="mb-6 font-mono text-sm">
+                <p class="text-cyber-green mb-1 terminal-text">$ Initializing secure connection...</p>
+                <p class="text-gray-500 mb-1">$ Loading authentication module...</p>
+                <p class="text-cyber-blue cursor-blink">$ Awaiting credentials</p>
+            </div>
+            
+            {% if error %}
+            <div class="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-6 font-mono text-sm">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <span>ERROR: Authentication failed. Access denied.</span>
+                </div>
+            </div>
+            {% endif %}
+            
+            <form action="/admin/login" method="POST" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                        <span class="text-cyber-blue">$</span> Username
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="username" name="username" required autocomplete="username"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white placeholder-gray-500 outline-none font-mono"
+                               placeholder="Enter username...">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                        <span class="text-cyber-blue">$</span> Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required autocomplete="current-password"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white placeholder-gray-500 outline-none font-mono"
+                               placeholder="Enter password...">
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="cyber-btn w-full py-4 rounded-lg text-white font-bold text-sm uppercase tracking-wider transition-all hover:shadow-lg hover:shadow-accent-500/30">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                        Initialize Session
+                    </span>
+                </button>
+            </form>
+            
+            <!-- Footer -->
+            <div class="mt-6 pt-4 border-t border-white/10 text-center">
+                <p class="text-xs text-gray-500 font-mono">
+                    <span class="text-cyber-green">●</span> Encrypted Connection
+                    <span class="mx-2">|</span>
+                    <span class="text-cyber-blue">●</span> v2.0.25
+                </p>
+            </div>
+        </div>
+        
+        <!-- Back to site link -->
+        <div class="text-center mt-6">
+            <a href="/" class="inline-flex items-center gap-2 text-gray-400 hover:text-accent-400 transition-colors text-sm font-mono">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Return to main site
+            </a>
+        </div>
+    </div>
+</body>
+</html>

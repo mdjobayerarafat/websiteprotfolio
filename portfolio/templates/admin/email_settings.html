@@ -1,0 +1,211 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-white flex items-center gap-3">
+                <span class="text-cyber-blue">$</span> Email Settings
+                <span class="animate-pulse text-cyber-green">_</span>
+            </h1>
+            <p class="text-gray-400 mt-2 font-mono text-sm">// Configure email notifications for contact form</p>
+        </div>
+    </div>
+
+    <!-- Gmail Setup Guide -->
+    <div class="glass-card rounded-2xl p-6 border border-cyber-blue/30">
+        <h3 class="text-lg font-bold text-cyber-blue mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Gmail Setup Guide
+        </h3>
+        <div class="text-gray-300 space-y-3 text-sm">
+            <p>To use Gmail for sending notifications, you need to create an <span class="text-cyber-green font-semibold">App Password</span>:</p>
+            <ol class="list-decimal list-inside space-y-2 ml-4">
+                <li>Go to <a href="https://myaccount.google.com/security" target="_blank" class="text-cyber-blue hover:underline">Google Account Security</a></li>
+                <li>Enable <span class="text-accent-500">2-Factor Authentication</span> if not already enabled</li>
+                <li>Go to <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-cyber-blue hover:underline">App Passwords</a></li>
+                <li>Create a new app password for "Mail"</li>
+                <li>Use the 16-character password generated (without spaces) below</li>
+            </ol>
+            <div class="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p class="text-yellow-400 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <strong>Important:</strong> Never use your regular Gmail password. Always use an App Password!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Settings Form -->
+    <form action="/admin/email-settings" method="POST" class="glass-card rounded-2xl p-8 space-y-6">
+        <!-- Enable Toggle -->
+        <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl border border-gray-700">
+            <div>
+                <label class="text-white font-semibold">Enable Email Notifications</label>
+                <p class="text-gray-400 text-sm">Send email when someone submits the contact form</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="enabled" value="on" class="sr-only peer" {% if email_settings.enabled %}checked{% endif %}>
+                <div class="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cyber-green"></div>
+            </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- SMTP Server -->
+            <div>
+                <label for="smtp_server" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="text-accent-500">$</span> SMTP Server
+                </label>
+                <input type="text" id="smtp_server" name="smtp_server" 
+                       value="{{ email_settings.smtp_server }}"
+                       placeholder="smtp.gmail.com"
+                       class="w-full px-4 py-3 bg-dark-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 font-mono">
+            </div>
+
+            <!-- SMTP Port -->
+            <div>
+                <label for="smtp_port" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="text-accent-500">$</span> SMTP Port
+                </label>
+                <input type="number" id="smtp_port" name="smtp_port" 
+                       value="{{ email_settings.smtp_port }}"
+                       placeholder="587"
+                       class="w-full px-4 py-3 bg-dark-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 font-mono">
+            </div>
+
+            <!-- SMTP Username -->
+            <div>
+                <label for="smtp_username" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="text-accent-500">$</span> SMTP Username (Your Gmail)
+                </label>
+                <input type="email" id="smtp_username" name="smtp_username" 
+                       value="{{ email_settings.smtp_username }}"
+                       placeholder="your-email@gmail.com"
+                       class="w-full px-4 py-3 bg-dark-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 font-mono">
+            </div>
+
+            <!-- SMTP Password -->
+            <div>
+                <label for="smtp_password" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="text-accent-500">$</span> App Password
+                </label>
+                <input type="password" id="smtp_password" name="smtp_password" 
+                       value="{{ email_settings.smtp_password }}"
+                       placeholder="xxxx xxxx xxxx xxxx"
+                       class="w-full px-4 py-3 bg-dark-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 font-mono">
+            </div>
+
+            <!-- Notification Email -->
+            <div class="md:col-span-2">
+                <label for="notification_email" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="text-accent-500">$</span> Notification Email (Where to receive notifications)
+                </label>
+                <input type="email" id="notification_email" name="notification_email" 
+                       value="{{ email_settings.notification_email }}"
+                       placeholder="your-email@gmail.com"
+                       class="w-full px-4 py-3 bg-dark-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 font-mono">
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-700">
+            <button type="button" onclick="testEmail()" 
+                    class="px-6 py-3 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue rounded-xl hover:bg-cyber-blue/30 transition-all flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Send Test Email
+            </button>
+            
+            <button type="submit" 
+                    class="px-8 py-3 bg-gradient-to-r from-accent-500 to-accent-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-accent-500/30 transition-all flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Save Settings
+            </button>
+        </div>
+    </form>
+
+    <!-- Test Result Modal -->
+    <div id="testModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-card rounded-2xl p-8 max-w-md mx-4">
+            <div id="testLoading" class="text-center">
+                <div class="animate-spin w-12 h-12 border-4 border-accent-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-white">Sending test email...</p>
+            </div>
+            <div id="testResult" class="hidden text-center">
+                <div id="testIcon" class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"></div>
+                <p id="testMessage" class="text-white mb-6"></p>
+                <button onclick="closeTestModal()" class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function testEmail() {
+    const modal = document.getElementById('testModal');
+    const loading = document.getElementById('testLoading');
+    const result = document.getElementById('testResult');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    loading.classList.remove('hidden');
+    result.classList.add('hidden');
+    
+    try {
+        const response = await fetch('/admin/email-settings/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        
+        loading.classList.add('hidden');
+        result.classList.remove('hidden');
+        
+        const icon = document.getElementById('testIcon');
+        const message = document.getElementById('testMessage');
+        
+        if (data.success) {
+            icon.innerHTML = '<svg class="w-8 h-8 text-cyber-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-cyber-green/20';
+            message.textContent = data.message;
+            message.className = 'text-cyber-green mb-6';
+        } else {
+            icon.innerHTML = '<svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-red-500/20';
+            message.textContent = data.message;
+            message.className = 'text-red-400 mb-6';
+        }
+    } catch (error) {
+        loading.classList.add('hidden');
+        result.classList.remove('hidden');
+        
+        const icon = document.getElementById('testIcon');
+        const message = document.getElementById('testMessage');
+        
+        icon.innerHTML = '<svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+        icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-red-500/20';
+        message.textContent = 'Failed to send test email: ' + error.message;
+        message.className = 'text-red-400 mb-6';
+    }
+}
+
+function closeTestModal() {
+    const modal = document.getElementById('testModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+</script>
+{% endblock %}

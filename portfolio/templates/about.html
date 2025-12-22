@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="pt-24 pb-20 relative overflow-hidden">
+    <!-- Background decorations -->
+    <div class="blob blob-orange w-[500px] h-[500px] -top-64 -right-64 opacity-30"></div>
+    <div class="blob blob-purple w-80 h-80 bottom-40 -left-40 opacity-20"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-16 animate-slide-up">
+            <span class="text-accent-500 font-medium uppercase tracking-wider text-sm">{{ content.about_label | default(value="Introduction") }}</span>
+            <h1 class="text-4xl md:text-5xl font-bold mt-2 mb-4">{{ content.about_title_prefix | default(value="About") }} <span class="gradient-text">{{ content.about_title | default(value="Me") }}</span></h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">{{ content.about_subtitle | default(value="Get to know more about my background, skills, and experience") }}</p>
+        </div>
+        
+        <!-- Profile Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <div class="flex justify-center animate-scale-in">
+                <div class="relative">
+                    <!-- Decorative elements -->
+                    <div class="absolute -inset-6 rounded-2xl border-2 border-dashed border-accent-500/20 rotate-3"></div>
+                    <div class="absolute -inset-10 rounded-2xl border border-accent-500/10 -rotate-3"></div>
+                    
+                    <div class="avatar-ring rounded-2xl">
+                        <img src="{{ profile.avatar_url }}" alt="{{ profile.name }}" 
+                             class="w-72 h-72 rounded-2xl object-cover relative z-10"
+                             onerror="this.src='https://ui-avatars.com/api/?name={{ profile.name | urlencode }}&size=288&background=f97316&color=fff'">
+                    </div>
+                    
+                    <!-- Experience badge -->
+                    <div class="absolute -right-6 -bottom-6 glass-card rounded-xl px-5 py-4 animate-float">
+                        <p class="text-3xl font-bold gradient-text">{{ content.about_experience_years | default(value="5+") }}</p>
+                        <p class="text-sm text-gray-400">{{ content.about_experience_label | default(value="Years Experience") }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="animate-slide-up">
+                <h2 class="text-3xl font-bold mb-4 text-white">{{ profile.name }}</h2>
+                <p class="text-xl text-accent-500 font-medium mb-4">{{ profile.title }}</p>
+                <p class="text-gray-300 mb-6 leading-relaxed text-lg">{{ profile.bio }}</p>
+                
+                <div class="space-y-4 mb-8">
+                    {% if profile.location %}
+                    <div class="flex items-center text-gray-300">
+                        <div class="skill-icon w-10 h-10 mr-4">
+                            <svg class="w-5 h-5 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <span>{{ profile.location }}</span>
+                    </div>
+                    {% endif %}
+                    {% if profile.email %}
+                    <div class="flex items-center text-gray-300">
+                        <div class="skill-icon w-10 h-10 mr-4">
+                            <svg class="w-5 h-5 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <span>{{ profile.email }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="flex flex-wrap gap-4">
+                    {% if profile.resume_url %}
+                    <a href="{{ profile.resume_url }}" target="_blank" class="btn-primary">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            {{ content.about_resume_btn | default(value="Download Resume") }}
+                        </span>
+                    </a>
+                    {% endif %}
+                    <a href="/contact" class="btn-secondary">{{ content.about_contact_btn | default(value="Contact Me") }}</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Skills Section -->
+        <div class="mb-20">
+            <div class="text-center mb-12">
+                <span class="text-accent-500 font-medium uppercase tracking-wider text-sm">{{ content.skills_label | default(value="Expertise") }}</span>
+                <h2 class="text-3xl font-bold mt-2">{{ content.skills_title_prefix | default(value="Technical") }} <span class="gradient-text">{{ content.skills_title | default(value="Skills") }}</span></h2>
+            </div>
+            
+            {% set categories = [] %}
+            {% for skill in skills %}
+                {% if skill.category not in categories %}
+                    {% set_global categories = categories | concat(with=[skill.category]) %}
+                {% endif %}
+            {% endfor %}
+            
+            {% for category in categories %}
+            <div class="mb-10">
+                <h3 class="text-xl font-semibold mb-6 text-accent-500 flex items-center gap-2">
+                    <span class="w-8 h-0.5 bg-accent-500"></span>
+                    {{ category }}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for skill in skills %}
+                    {% if skill.category == category %}
+                    <div class="glass-card rounded-xl p-5 flex items-center">
+                        <div class="skill-icon mr-4">
+                            <span class="text-xl">{{ skill.icon }}</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium text-white">{{ skill.name }}</span>
+                                <span class="text-sm text-accent-400 font-medium">{{ skill.proficiency }}%</span>
+                            </div>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar" style="width: {{ skill.proficiency }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Experience Section -->
+        <div class="mb-20">
+            <div class="text-center mb-12">
+                <span class="text-accent-500 font-medium uppercase tracking-wider text-sm">{{ content.experience_label | default(value="Career") }}</span>
+                <h2 class="text-3xl font-bold mt-2">{{ content.experience_title_prefix | default(value="Work") }} <span class="gradient-text">{{ content.experience_title | default(value="Experience") }}</span></h2>
+            </div>
+            
+            <div class="max-w-3xl mx-auto">
+                {% for exp in experience %}
+                <div class="relative pl-10 pb-12 {% if loop.last %}pb-0{% endif %} animate-slide-up stagger-{{ loop.index }}">
+                    {% if not loop.last %}
+                    <div class="absolute left-[7px] top-4 bottom-0 w-0.5 timeline-line"></div>
+                    {% endif %}
+                    <div class="timeline-dot absolute left-0 top-1"></div>
+                    
+                    <div class="glass-card rounded-xl p-6 ml-4">
+                        <div class="flex flex-wrap justify-between items-start mb-3 gap-2">
+                            <h3 class="text-xl font-bold text-white">{{ exp.position }}</h3>
+                            <span class="badge">
+                                {{ exp.start_date }} - {% if exp.current %}Present{% else %}{{ exp.end_date }}{% endif %}
+                            </span>
+                        </div>
+                        <p class="text-accent-500 font-medium mb-3">{{ exp.company }}</p>
+                        <p class="text-gray-400 leading-relaxed">{{ exp.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Education Section -->
+        <div>
+            <div class="text-center mb-12">
+                <span class="text-accent-500 font-medium uppercase tracking-wider text-sm">{{ content.education_label | default(value="Learning") }}</span>
+                <h2 class="text-3xl font-bold mt-2"><span class="gradient-text">{{ content.education_title | default(value="Education") }}</span></h2>
+            </div>
+            
+            <div class="max-w-3xl mx-auto">
+                {% for edu in education %}
+                <div class="glass-card rounded-xl p-6 mb-4 animate-slide-up stagger-{{ loop.index }}">
+                    <div class="flex flex-wrap justify-between items-start mb-3 gap-2">
+                        <h3 class="text-xl font-bold text-white">{{ edu.degree }}</h3>
+                        <span class="badge">{{ edu.start_date }} - {{ edu.end_date }}</span>
+                    </div>
+                    <p class="text-accent-500 font-medium mb-2">{{ edu.institution }}</p>
+                    <p class="text-gray-300 mb-2">{{ edu.field }}</p>
+                    {% if edu.description %}
+                    <p class="text-gray-400 text-sm">{{ edu.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

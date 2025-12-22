@@ -1,0 +1,166 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <a href="/admin/blogs" class="inline-flex items-center gap-2 text-gray-400 hover:text-accent-400 transition-colors mb-4 font-mono text-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        cd ../blogs
+    </a>
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-500 to-cyber-purple flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {% if editing %}
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                {% else %}
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                {% endif %}
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">{% if editing %}Edit Blog Post{% else %}Create New Post{% endif %}</h1>
+            <p class="text-gray-400 text-sm font-mono">$ blog --{% if editing %}edit --id={{ blog.id }}{% else %}create --new{% endif %}</p>
+        </div>
+    </div>
+</div>
+
+<div class="cyber-card rounded-xl overflow-hidden">
+    <!-- Terminal Header -->
+    <div class="flex items-center gap-2 px-6 py-4 border-b border-white/10 bg-dark-800/50">
+        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        <span class="ml-4 text-xs text-gray-500 font-mono">blog_editor.exe --mode=form</span>
+    </div>
+    
+    <div class="p-6">
+        <form action="{% if editing %}/admin/blogs/edit/{{ blog.id }}{% else %}/admin/blogs/add{% endif %}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            
+            <!-- Basic Info Section -->
+            <div class="border-b border-white/10 pb-6">
+                <h3 class="text-sm font-mono text-cyber-blue uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyber-blue animate-pulse"></span>
+                    Post Details
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="title" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Post Title
+                        </label>
+                        <input type="text" id="title" name="title" value="{% if editing %}{{ blog.title }}{% endif %}" required
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none">
+                    </div>
+                    
+                    <div>
+                        <label for="excerpt" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Excerpt
+                        </label>
+                        <textarea id="excerpt" name="excerpt" rows="2" required
+                                  class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none resize-none">{% if editing %}{{ blog.excerpt }}{% endif %}</textarea>
+                        <p class="text-xs text-gray-500 mt-1 font-mono">Brief summary for listing page</p>
+                    </div>
+                    
+                    <div>
+                        <label for="content" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Content (Markdown)
+                        </label>
+                        <textarea id="content" name="content" rows="15" required
+                                  class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono text-sm">{% if editing %}{{ blog.content }}{% endif %}</textarea>
+                        <p class="text-xs text-gray-500 mt-1 font-mono">Supports: **bold**, *italic*, ## headings, ``` code ```, - lists, [links](url)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Media Section -->
+            <div class="border-b border-white/10 pb-6">
+                <h3 class="text-sm font-mono text-cyber-purple uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyber-purple animate-pulse"></span>
+                    Media & Tags
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-cyber rounded-xl p-4">
+                        <label class="block text-xs font-mono text-gray-400 mb-3 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Featured Image
+                        </label>
+                        {% if editing and blog.image_url %}
+                        <div class="mb-3">
+                            <img src="{{ blog.image_url }}" alt="Current Image" 
+                                 class="w-full h-32 rounded-lg object-cover border border-white/10" id="blog-image-preview">
+                        </div>
+                        {% else %}
+                        <div class="mb-3 w-full h-32 rounded-lg bg-dark-700 border border-white/10 flex items-center justify-center hidden" id="blog-image-preview-container">
+                            <img src="" alt="Image Preview" class="w-full h-32 rounded-lg object-cover" id="blog-image-preview">
+                        </div>
+                        {% endif %}
+                        <input type="file" id="image_file" name="image_file" accept="image/*"
+                               class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-500/20 file:text-accent-400 file:cursor-pointer"
+                               onchange="previewBlogImage(this)">
+                        <input type="text" id="image_url" name="image_url" value="{% if editing %}{{ blog.image_url }}{% endif %}" 
+                               placeholder="Or enter image URL"
+                               class="w-full mt-2 px-3 py-2 text-sm rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                    
+                    <div>
+                        <label for="tags" class="block text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">
+                            <span class="text-accent-500">$</span> Tags (comma-separated)
+                        </label>
+                        <input type="text" id="tags" name="tags" value="{% if editing %}{{ blog.tags }}{% endif %}" 
+                               placeholder="e.g., Rust, Web Development, Tutorial"
+                               class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-white outline-none font-mono">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Options Section -->
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="published" name="published" value="1"
+                           {% if editing and blog.published %}checked{% endif %}
+                           class="w-5 h-5 rounded bg-dark-700 border-white/20 text-accent-500 focus:ring-accent-500">
+                    <span class="text-sm font-mono text-gray-300">
+                        <span class="text-cyber-green">●</span> Publish immediately
+                    </span>
+                </label>
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex justify-end gap-4 pt-4">
+                <a href="/admin/blogs" class="px-6 py-3 rounded-lg border border-white/10 text-gray-300 font-mono text-sm hover:bg-white/5 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="cyber-btn px-8 py-3 rounded-lg text-white font-bold text-sm uppercase tracking-wider">
+                    <span class="relative z-10 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        {% if editing %}Update Post{% else %}Create Post{% endif %}
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewBlogImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let preview = document.getElementById('blog-image-preview');
+            let container = document.getElementById('blog-image-preview-container');
+            if (container) {
+                container.classList.remove('hidden');
+            }
+            if (preview) {
+                preview.src = e.target.result;
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Page Header -->
+<div class="flex justify-between items-center mb-8">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyber-green to-cyber-blue flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">Manage Services</h1>
+            <p class="text-gray-400 text-sm font-mono">$ system.services --list</p>
+        </div>
+    </div>
+    <a href="/admin/services/add" class="cyber-btn px-6 py-3 rounded-lg text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Service
+    </a>
+</div>
+
+{% if services | length == 0 %}
+<!-- Empty State -->
+<div class="cyber-card rounded-xl p-12 text-center">
+    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-cyber-green/20 to-cyber-blue/20 flex items-center justify-center mx-auto mb-6">
+        <span class="text-4xl">🛠️</span>
+    </div>
+    <h3 class="text-xl font-bold mb-2">No Services Found</h3>
+    <p class="text-gray-400 mb-6 font-mono text-sm">$ database.services.count() → 0</p>
+    <a href="/admin/services/add" class="inline-flex items-center cyber-btn px-6 py-3 rounded-lg text-white font-bold text-sm uppercase tracking-wider gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add First Service
+    </a>
+</div>
+{% else %}
+<!-- Services Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for service in services %}
+    <div class="cyber-card rounded-xl overflow-hidden group hover:border-accent-500/50 transition-all duration-300">
+        <!-- Service Image -->
+        <div class="aspect-video bg-dark-800 relative overflow-hidden">
+            {% if service.image_url %}
+            <img src="{{ service.image_url }}" alt="{{ service.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-6xl bg-gradient-to-br from-dark-700 to-dark-800">
+                {{ service.icon }}
+            </div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-dark-950 via-transparent to-transparent opacity-80"></div>
+            
+            <!-- Order Badge -->
+            <div class="absolute top-3 right-3 px-3 py-1 rounded-full bg-dark-900/80 backdrop-blur-sm border border-white/10 text-xs font-mono text-gray-300 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                </svg>
+                {{ service.order_index }}
+            </div>
+            
+            <!-- Status Indicator -->
+            <div class="absolute top-3 left-3">
+                <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse inline-block"></span>
+            </div>
+        </div>
+        
+        <!-- Service Info -->
+        <div class="p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-2xl">{{ service.icon }}</span>
+                <h3 class="text-lg font-bold text-white group-hover:text-accent-400 transition-colors">{{ service.name }}</h3>
+            </div>
+            <p class="text-gray-400 text-sm mb-4 line-clamp-2 font-mono">{{ service.description | truncate(length=80) }}</p>
+            
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <a href="/admin/services/edit/{{ service.id }}" class="flex-1 py-2 px-4 rounded-lg bg-dark-700/50 border border-white/10 text-gray-300 hover:border-accent-500/50 hover:text-accent-400 text-center text-sm font-mono transition-all">
+                    Edit
+                </a>
+                <form action="/admin/services/delete/{{ service.id }}" method="POST" onsubmit="return confirm('⚠️ Delete this service?');">
+                    <button type="submit" class="py-2 px-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-sm font-mono transition-all">
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
