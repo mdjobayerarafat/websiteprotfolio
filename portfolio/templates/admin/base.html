@@ -241,6 +241,184 @@
             border-color: #f97316 !important;
             box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1), 0 0 20px rgba(249, 115, 22, 0.1);
         }
+        
+        /* ========== RESPONSIVE STYLES ========== */
+        
+        /* Mobile Menu Toggle Button */
+        .mobile-menu-btn {
+            display: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: rgba(26, 26, 36, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mobile-menu-btn:hover {
+            background: rgba(249, 115, 22, 0.2);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+        .mobile-menu-btn svg {
+            width: 24px;
+            height: 24px;
+            color: #f97316;
+        }
+        
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 45;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+        }
+        
+        /* Close button for mobile sidebar */
+        .sidebar-close-btn {
+            display: none;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+            z-index: 10;
+        }
+        .sidebar-close-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #ef4444;
+        }
+        
+        /* Tablet styles (max-width: 1024px) */
+        @media (max-width: 1024px) {
+            aside.glass-cyber {
+                width: 260px;
+            }
+            main.flex-1 {
+                margin-left: 260px;
+            }
+            header.glass-cyber {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            .p-8 {
+                padding: 1.5rem;
+            }
+            footer {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+        
+        /* Mobile styles (max-width: 768px) */
+        @media (max-width: 768px) {
+            /* Show mobile menu button */
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Show close button */
+            .sidebar-close-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Show overlay */
+            .sidebar-overlay {
+                display: block;
+                pointer-events: none;
+            }
+            .sidebar-overlay.active {
+                pointer-events: auto;
+            }
+            
+            /* Sidebar becomes overlay drawer */
+            aside.glass-cyber {
+                width: 280px;
+                max-width: 85vw;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            aside.glass-cyber.open {
+                transform: translateX(0);
+            }
+            
+            /* Main content full width */
+            main.flex-1 {
+                margin-left: 0;
+            }
+            
+            /* Header adjustments */
+            header.glass-cyber {
+                padding: 0.75rem 1rem;
+            }
+            header h1 {
+                font-size: 1rem;
+            }
+            
+            /* Hide neural link status on mobile */
+            .hidden.md\\:flex {
+                display: none !important;
+            }
+            
+            /* Content padding */
+            .p-8 {
+                padding: 1rem;
+            }
+            
+            /* Footer */
+            footer {
+                padding: 0.75rem 1rem;
+            }
+            footer > div {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            footer .flex.items-center.gap-4 {
+                justify-content: center;
+            }
+        }
+        
+        /* Small mobile styles (max-width: 480px) */
+        @media (max-width: 480px) {
+            aside.glass-cyber {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .p-8 {
+                padding: 0.75rem;
+            }
+            
+            header h1 {
+                font-size: 0.875rem;
+            }
+            
+            /* Sidebar navigation items */
+            .nav-item {
+                padding: 0.625rem 1rem;
+            }
+            .nav-item .w-8 {
+                width: 1.75rem;
+                height: 1.75rem;
+            }
+            .nav-item span {
+                font-size: 0.875rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-dark-950 text-gray-100 min-h-screen flex circuit-bg">
@@ -257,8 +435,18 @@
         <div class="data-stream left-3/4" style="animation-delay: -2s;"></div>
     </div>
 
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
     <!-- Sidebar -->
-    <aside class="w-72 glass-cyber min-h-screen fixed left-0 top-0 z-50 flex flex-col">
+    <aside class="w-72 glass-cyber min-h-screen fixed left-0 top-0 z-50 flex flex-col" id="sidebar">
+        <!-- Close Button (Mobile) -->
+        <button class="sidebar-close-btn" onclick="closeSidebar()" aria-label="Close menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
         <!-- Logo Section -->
         <div class="p-6 border-b border-white/5">
             <div class="flex items-center gap-3">
@@ -429,6 +617,13 @@
         <header class="sticky top-0 z-40 glass-cyber border-b border-white/5 px-8 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
+                    <!-- Mobile Menu Button -->
+                    <button class="mobile-menu-btn" onclick="openSidebar()" aria-label="Open menu">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    
                     <h1 class="text-xl font-bold font-mono gradient-text-cyber">{{ page_title }}</h1>
                     <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-dark-700/50 border border-white/5">
                         <div class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></div>
@@ -486,11 +681,50 @@
     </main>
     
     <script>
+        // Sidebar toggle functions
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Close sidebar when clicking a nav link on mobile
+        document.querySelectorAll('#sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
+        });
+        
+        // Close sidebar on window resize if larger than mobile
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+        
+        // Close sidebar on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+        
         // Update time
         function updateTime() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('current-time').textContent = timeStr;
+            const timeEl = document.getElementById('current-time');
+            if (timeEl) {
+                timeEl.textContent = timeStr;
+            }
         }
         updateTime();
         setInterval(updateTime, 1000);
@@ -499,7 +733,10 @@
         document.addEventListener('keydown', function(e) {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                document.querySelector('input[placeholder="Search modules..."]').focus();
+                const searchInput = document.querySelector('input[placeholder="Search modules..."]');
+                if (searchInput) {
+                    searchInput.focus();
+                }
             }
         });
         
