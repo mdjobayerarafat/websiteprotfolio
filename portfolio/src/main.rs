@@ -97,6 +97,13 @@ async fn main() -> std::io::Result<()> {
             // Site content routes
             .route("/admin/site-content", web::get().to(admin::site_content_page))
             .route("/admin/site-content", web::post().to(admin::update_site_content))
+            // Experience routes
+            .route("/admin/experience", web::get().to(admin::experience_page))
+            .route("/admin/experience/add", web::get().to(admin::add_experience_page))
+            .route("/admin/experience/add", web::post().to(admin::add_experience))
+            .route("/admin/experience/edit/{id}", web::get().to(admin::edit_experience_page))
+            .route("/admin/experience/edit/{id}", web::post().to(admin::update_experience))
+            .route("/admin/experience/delete/{id}", web::post().to(admin::delete_experience))
             // Education routes
             .route("/admin/education", web::get().to(admin::education_page))
             .route("/admin/education/add", web::get().to(admin::add_education_page))

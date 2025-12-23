@@ -167,7 +167,7 @@ pub fn init_db() -> Result<Connection> {
         )?;
     }
 
-    // Insert default admin if not exists
+    // Insert default admin if not exists, or update existing admin credentials
     let admin_count: i32 = conn.query_row(
         "SELECT COUNT(*) FROM admin",
         [],
@@ -175,12 +175,20 @@ pub fn init_db() -> Result<Connection> {
     )?;
 
     if admin_count == 0 {
-        let password_hash = hash("admin123", DEFAULT_COST).expect("Failed to hash password");
+        let password_hash = hash("Melucifer2022", DEFAULT_COST).expect("Failed to hash password");
         conn.execute(
-            "INSERT INTO admin (id, username, password_hash) VALUES (1, 'admin', ?1)",
+            "INSERT INTO admin (id, username, password_hash) VALUES (1, 'aiya', ?1)",
             [&password_hash],
         )?;
-        log::info!("Default admin created - username: admin, password: admin123");
+        log::info!("Default admin created - username: aiya");
+    } else {
+        // Update existing admin credentials (remove this block after first deployment)
+        let password_hash = hash("Melucifer2022", DEFAULT_COST).expect("Failed to hash password");
+        conn.execute(
+            "UPDATE admin SET username = 'aiya', password_hash = ?1 WHERE id = 1",
+            [&password_hash],
+        )?;
+        log::info!("Admin credentials updated - username: aiya");
     }
 
     // Insert sample skills if empty
@@ -688,6 +696,47 @@ pub fn get_experience(conn: &Connection) -> Result<Vec<Experience>> {
     experience.collect()
 }
 
+pub fn get_experience_by_id(conn: &Connection, id: i32) -> Result<Experience> {
+    conn.query_row(
+        "SELECT id, company, position, description, start_date, end_date, current FROM experience WHERE id = ?1",
+        rusqlite::params![id],
+        |row| {
+            Ok(Experience {
+                id: row.get(0)?,
+                company: row.get(1)?,
+                position: row.get(2)?,
+                description: row.get(3)?,
+                start_date: row.get(4)?,
+                end_date: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
+                current: row.get(6)?,
+            })
+        },
+    )
+}
+
+pub fn add_experience(conn: &Connection, exp: &ExperienceForm) -> Result<()> {
+    let is_current = exp.current.as_ref().map(|v| v == "true").unwrap_or(false);
+    conn.execute(
+        "INSERT INTO experience (company, position, description, start_date, end_date, current) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        rusqlite::params![exp.company, exp.position, exp.description, exp.start_date, exp.end_date, is_current],
+    )?;
+    Ok(())
+}
+
+pub fn update_experience(conn: &Connection, id: i32, exp: &ExperienceForm) -> Result<()> {
+    let is_current = exp.current.as_ref().map(|v| v == "true").unwrap_or(false);
+    conn.execute(
+        "UPDATE experience SET company = ?1, position = ?2, description = ?3, start_date = ?4, end_date = ?5, current = ?6 WHERE id = ?7",
+        rusqlite::params![exp.company, exp.position, exp.description, exp.start_date, exp.end_date, is_current, id],
+    )?;
+    Ok(())
+}
+
+pub fn delete_experience(conn: &Connection, id: i32) -> Result<()> {
+    conn.execute("DELETE FROM experience WHERE id = ?1", rusqlite::params![id])?;
+    Ok(())
+}
+
 pub fn get_education(conn: &Connection) -> Result<Vec<Education>> {
     let mut stmt = conn.prepare("SELECT id, institution, degree, field, start_date, end_date, description FROM education ORDER BY start_date DESC")?;
     let education = stmt.query_map([], |row| {
@@ -793,6 +842,16 @@ pub fn get_admin(conn: &Connection, username: &str) -> Result<Admin> {
             })
         },
     )
+}
+
+pub fn update_admin_credentials(conn: &Connection, new_username: &str, new_password: &str) -> Result<()> {
+    use bcrypt::{hash, DEFAULT_COST};
+    let password_hash = hash(new_password, DEFAULT_COST).expect("Failed to hash password");
+    conn.execute(
+        "UPDATE admin SET username = ?1, password_hash = ?2 WHERE id = 1",
+        rusqlite::params![new_username, password_hash],
+    )?;
+    Ok(())
 }
 
 // Image functions

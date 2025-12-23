@@ -1170,6 +1170,132 @@ pub async fn update_site_content(
         .finish()
 }
 
+// Experience Management
+pub async fn experience_page(
+    data: web::Data<AppState>,
+    session: Session,
+) -> HttpResponse {
+    if let Some(redirect) = require_auth(&session) {
+        return redirect;
+    }
+    
+    let conn = data.db.lock().unwrap();
+    let experience = db::get_experience(&conn).unwrap_or_default();
+    
+    let mut context = tera::Context::new();
+    context.insert("experience", &experience);
+    context.insert("page_title", "Experience");
+    
+    let rendered = data.tera.render("admin/experience.html", &context).unwrap();
+    HttpResponse::Ok().content_type("text/html").body(rendered)
+}
+
+pub async fn add_experience_page(
+    data: web::Data<AppState>,
+    session: Session,
+) -> HttpResponse {
+    if let Some(redirect) = require_auth(&session) {
+        return redirect;
+    }
+    
+    let mut context = tera::Context::new();
+    context.insert("page_title", "Add Experience");
+    
+    let rendered = data.tera.render("admin/experience_form.html", &context).unwrap();
+    HttpResponse::Ok().content_type("text/html").body(rendered)
+}
+
+pub async fn add_experience(
+    data: web::Data<AppState>,
+    form: web::Form<ExperienceForm>,
+    session: Session,
+) -> HttpResponse {
+    if let Some(redirect) = require_auth(&session) {
+        return redirect;
+    }
+    
+    let conn = data.db.lock().unwrap();
+    
+    match db::add_experience(&conn, &form.into_inner()) {
+        Ok(_) => log::info!("Experience added successfully"),
+        Err(e) => log::error!("Failed to add experience: {}", e),
+    }
+    
+    HttpResponse::Found()
+        .append_header(("Location", "/admin/experience"))
+        .finish()
+}
+
+pub async fn edit_experience_page(
+    data: web::Data<AppState>,
+    path: web::Path<i32>,
+    session: Session,
+) -> HttpResponse {
+    if let Some(redirect) = require_auth(&session) {
+        return redirect;
+    }
+    
+    let conn = data.db.lock().unwrap();
+    let id = path.into_inner();
+    
+    match db::get_experience_by_id(&conn, id) {
+        Ok(exp) => {
+            let mut context = tera::Context::new();
+            context.insert("experience", &exp);
+            context.insert("page_title", "Edit Experience");
+            
+            let rendered = data.tera.render("admin/experience_form.html", &context).unwrap();
+            HttpResponse::Ok().content_type("text/html").body(rendered)
+        }
+        Err(_) => HttpResponse::NotFound().body("Experience not found"),
+    }
+}
+
+pub async fn update_experience(
+    data: web::Data<AppState>,
+    path: web::Path<i32>,
+    form: web::Form<ExperienceForm>,
+    session: Session,
+) -> HttpResponse {
+    if let Some(redirect) = require_auth(&session) {
+        return redirect;
+    }
+    
+    let conn = data.db.lock().unwrap();
+    let id = path.into_inner();
+    
+    match db::update_experience(&conn, id, &form.into_inner()) {
+        Ok(_) => log::info!("Experience updated successfully"),
+        Err(e) => log::error!("Failed to update experience: {}", e),
+    }
+    
+    HttpResponse::Found()
+        .append_header(("Location", "/admin/experience"))
+        .finish()
+}
+
+pub async fn delete_experience(
+    data: web::Data<AppState>,
+    path: web::Path<i32>,
+    session: Session,
+) -> HttpResponse {
+    if let Some(redirect) = require_auth(&session) {
+        return redirect;
+    }
+    
+    let conn = data.db.lock().unwrap();
+    let id = path.into_inner();
+    
+    match db::delete_experience(&conn, id) {
+        Ok(_) => log::info!("Experience deleted successfully"),
+        Err(e) => log::error!("Failed to delete experience: {}", e),
+    }
+    
+    HttpResponse::Found()
+        .append_header(("Location", "/admin/experience"))
+        .finish()
+}
+
 // Education Management
 pub async fn education_page(
     data: web::Data<AppState>,

@@ -1,0 +1,111 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Page Header -->
+<div class="flex items-center gap-4 mb-8">
+    <a href="/admin/experience" class="w-10 h-10 rounded-lg bg-dark-700/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-accent-500/50 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+    </a>
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyber-purple to-cyber-blue flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">{% if experience %}Edit Experience{% else %}Add Experience{% endif %}</h1>
+            <p class="text-gray-400 text-sm font-mono">$ experience.{% if experience %}update{% else %}create{% endif %}()</p>
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<div class="cyber-card rounded-xl p-6">
+    <form action="{% if experience %}/admin/experience/edit/{{ experience.id }}{% else %}/admin/experience/add{% endif %}" method="POST" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Position -->
+            <div class="md:col-span-2">
+                <label for="position" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Position / Job Title
+                </label>
+                <input type="text" id="position" name="position" required
+                       value="{{ experience.position | default(value='') }}"
+                       placeholder="e.g., Senior Software Developer, Full Stack Engineer"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- Company -->
+            <div class="md:col-span-2">
+                <label for="company" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Company / Organization
+                </label>
+                <input type="text" id="company" name="company" required
+                       value="{{ experience.company | default(value='') }}"
+                       placeholder="e.g., Tech Company Inc."
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- Start Date -->
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Start Date
+                </label>
+                <input type="text" id="start_date" name="start_date" required
+                       value="{{ experience.start_date | default(value='') }}"
+                       placeholder="e.g., 2022-01 or January 2022"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all">
+            </div>
+            
+            <!-- End Date -->
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> End Date
+                </label>
+                <input type="text" id="end_date" name="end_date"
+                       value="{{ experience.end_date | default(value='') }}"
+                       placeholder="e.g., 2024-01 (leave empty if current)"
+                       class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all"
+                       {% if experience.current %}disabled{% endif %}>
+            </div>
+            
+            <!-- Current Position Checkbox -->
+            <div class="md:col-span-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="current" name="current" value="true"
+                           {% if experience.current %}checked{% endif %}
+                           class="w-5 h-5 rounded border-white/10 bg-dark-800/50 text-accent-500 focus:ring-accent-500/20 focus:ring-offset-0"
+                           onchange="document.getElementById('end_date').disabled = this.checked; if(this.checked) document.getElementById('end_date').value = '';">
+                    <span class="text-gray-300 font-medium">
+                        <span class="font-mono text-accent-400">&gt;</span> I currently work here
+                    </span>
+                </label>
+            </div>
+            
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span class="font-mono text-accent-400">&gt;</span> Description
+                </label>
+                <textarea id="description" name="description" rows="5"
+                          placeholder="Describe your responsibilities, achievements, and technologies used..."
+                          class="cyber-input w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-white/10 text-white placeholder-gray-500 focus:border-accent-500/50 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all resize-none">{{ experience.description | default(value='') }}</textarea>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex justify-end gap-4 pt-6 border-t border-white/5">
+            <a href="/admin/experience" class="px-6 py-3 rounded-lg bg-dark-700/50 border border-white/10 text-gray-400 hover:text-white hover:border-white/30 font-medium transition-all">
+                Cancel
+            </a>
+            <button type="submit" class="cyber-btn px-6 py-3 rounded-lg text-white font-bold uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {% if experience %}Update{% else %}Add{% endif %} Experience
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

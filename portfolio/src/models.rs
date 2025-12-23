@@ -185,6 +185,16 @@ pub struct EducationForm {
     pub description: String,
 }
 
+#[derive(Debug, Deserialize, Default)]
+pub struct ExperienceForm {
+    pub company: String,
+    pub position: String,
+    pub description: String,
+    pub start_date: String,
+    pub end_date: String,
+    pub current: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EmailSettings {
     pub id: i32,
