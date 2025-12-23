@@ -323,6 +323,7 @@ class AutoTranslator {
     }
 
     // Detect if user is from China or prefers Chinese
+    // Website content is in Chinese - translate to English for non-Chinese users
     detectLanguage() {
         const userLang = navigator.language || navigator.userLanguage;
         const isChineseUser = userLang.startsWith('zh') || 
@@ -336,13 +337,15 @@ class AutoTranslator {
                                    timezone.includes('Hong_Kong') ||
                                    timezone.includes('Taipei');
         
+        // Chinese users see original Chinese content, others get English translation
         return (isChineseUser || isChineseTimezone) ? 'zh' : 'en';
     }
 
     // Translate text using LibreTranslate API
-    async translateText(text, targetLang = 'zh') {
+    // Source is Chinese (zh), target is English (en) for non-Chinese users
+    async translateText(text, targetLang = 'en') {
         if (!text || text.trim().length === 0) return text;
-        if (targetLang === 'en') return text;
+        if (targetLang === 'zh') return text; // Chinese users see original content
         
         // Check cache first
         const cacheKey = `${text.trim()}_${targetLang}`;
@@ -359,7 +362,7 @@ class AutoTranslator {
                 },
                 body: JSON.stringify({
                     q: text.trim(),
-                    source: 'en',
+                    source: 'zh',
                     target: targetLang,
                     format: 'text'
                 })
@@ -422,9 +425,9 @@ class AutoTranslator {
         return textNodes;
     }
 
-    // Translate the entire page
+    // Translate the entire page to English for non-Chinese users
     async translatePage() {
-        if (this.isTranslating || this.currentLang === 'en') return;
+        if (this.isTranslating || this.currentLang === 'zh') return; // Chinese users don't need translation
         this.isTranslating = true;
         
         this.showLoadingIndicator();
@@ -526,10 +529,10 @@ class AutoTranslator {
         this.currentLang = lang;
         localStorage.setItem('selectedLang', lang);
         
-        if (lang === 'en') {
-            this.restoreOriginal();
+        if (lang === 'zh') {
+            this.restoreOriginal(); // Show original Chinese content
         } else {
-            await this.translatePage();
+            await this.translatePage(); // Translate to English
         }
         
         this.updateLanguageSwitcher();
@@ -638,8 +641,8 @@ class AutoTranslator {
     async init() {
         this.createLanguageSwitcher();
         
-        // Auto-translate if Chinese user
-        if (this.currentLang === 'zh') {
+        // Auto-translate to English for non-Chinese users
+        if (this.currentLang === 'en') {
             // Wait for page to fully load
             if (document.readyState === 'complete') {
                 await this.translatePage();
@@ -655,7 +658,7 @@ class AutoTranslator {
     // Watch for dynamic content and translate it
     observeDynamicContent() {
         const observer = new MutationObserver((mutations) => {
-            if (this.currentLang !== 'zh' || this.isTranslating) return;
+            if (this.currentLang !== 'en' || this.isTranslating) return; // Only translate for English users
             
             let hasNewContent = false;
             mutations.forEach(mutation => {
